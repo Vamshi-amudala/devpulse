@@ -1,5 +1,7 @@
 package com.example.user.controller;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +29,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequestDto dto) {
-        String result = userService.login(dto);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequestDto dto) {
+        String token = userService.login(dto);
+        return ResponseEntity.ok(Map.of("token", token));
     }
 
 }

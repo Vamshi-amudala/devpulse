@@ -1,0 +1,128 @@
+# DevPulse — Project Overview
+
+## What is DevPulse?
+
+DevPulse is a **developer project showcase platform** built with Spring Boot 3. It provides a REST API backend for managing developer accounts, with authentication, input validation, and structured error handling.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Spring Boot 3.2.5 |
+| Language | Java 21 |
+| Database | PostgreSQL (via Aiven) |
+| ORM | Spring Data JPA / Hibernate |
+| Security | Spring Security 6 |
+| Validation | Jakarta Bean Validation |
+| Boilerplate | Lombok |
+| Config | springboot3-dotenv (`.env` file support) |
+| Build | Maven |
+
+---
+
+## Project Structure
+
+```
+com.example
+├── DevPulseApplication.java          # Entry point
+├── config/
+│   └── SecurityConfig.java           # Security filter chain
+└── user/
+    ├── controller/
+    │   └── UserController.java       # REST endpoints
+    ├── dto/
+    │   ├── RegisterRequest.java      # Register input + validation
+    │   └── LoginRequestDto.java      # Login input + validation
+    ├── entity/
+    │   ├── User.java                 # JPA entity
+    │   └── Role.java                 # Enum: USER, ADMIN
+    ├── exception/
+    │   ├── EmailAlreadyExistsException.java
+    │   ├── InvalidCredentialsException.java
+    │   ├── EmailNotFoundException.java
+    │   └── GlobalExceptionHandler.java  # @RestControllerAdvice
+    ├── repository/
+    │   └── UserRepository.java       # Spring Data JPA
+    └── service/
+        ├── UserService.java          # Interface
+        └── UserServiceImpl.java      # Implementation
+```
+
+---
+
+## Implemented Features
+
+### User Registration — `POST /api/users/register`
+- Accepts `name`, `email`, [password](file:///c:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/config/SecurityConfig.java#29-33)
+- Checks if email already exists → throws `EmailAlreadyExistsException`
+- Encodes password with `BCryptPasswordEncoder`
+- Assigns default role `USER`
+- Auto-sets `createdAt` via `@PrePersist`
+- Returns **201 Created**
+
+### User Login — `POST /api/users/login`
+- Accepts `email`, [password](file:///c:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/config/SecurityConfig.java#29-33)
+- Fetches user by email → throws `InvalidCredentialsException` if not found
+- Verifies password with BCrypt → throws `InvalidCredentialsException` if wrong
+- Returns **200 OK** with `"Login successful"`
+
+---
+
+## Input Validation
+
+Both DTOs enforce strict validation via `@Valid`:
+
+| Field | Rules |
+|---|---|
+| `name` | Not blank |
+| `email` | Not blank, valid email format |
+| [password](file:///c:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/config/SecurityConfig.java#29-33) | 6–20 chars, must contain uppercase, lowercase, digit, and special char (`@#$%^&+=`) |
+
+**Example valid password:** `Vamshi@123`
+
+---
+
+## Error Handling
+
+All errors are caught by [GlobalExceptionHandler](file:///c:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/user/exception/GlobalExceptionHandler.java#12-34) and return clean JSON responses:
+
+| Exception | HTTP Status | Response |
+|---|---|---|
+| `MethodArgumentNotValidException` | 400 Bad Request | `{ "field": "error message" }` |
+| `EmailAlreadyExistsException` | 400 Bad Request | Plain string message |
+| `InvalidCredentialsException` | 401 Unauthorized | Plain string message |
+
+---
+
+## Security Configuration
+
+- **CSRF** disabled (stateless REST API)
+- **Sessions** stateless (`STATELESS` policy)
+- **Public endpoints:** `POST /api/users/register`, `POST /api/users/login`
+- **All other endpoints** require authentication
+
+---
+
+## Database Configuration
+
+Credentials are loaded from a `.env` file (never committed to git):
+
+```properties
+# application.properties
+spring.datasource.url=${DB_URL}
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.hikari.maximum-pool-size=5
+```
+
+---
+
+## What's Next
+
+- JWT token generation on login (replace plain string response)
+- Project entity (CRUD for developer projects)
+- User profile endpoints
+- Role-based access control (ADMIN vs USER)
