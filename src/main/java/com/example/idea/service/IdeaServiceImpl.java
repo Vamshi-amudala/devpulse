@@ -12,6 +12,7 @@ import com.example.idea.dto.IdeaRequest;
 import com.example.idea.dto.IdeaResponse;
 import com.example.idea.entity.Idea;
 import com.example.idea.exception.IdeaNotFoundByIDException;
+import com.example.idea.exception.UnauthorizedAccessException;
 import com.example.idea.repository.IdeaRepository;
 import com.example.user.entity.User;
 import com.example.user.repository.UserRepository;
@@ -20,10 +21,10 @@ import com.example.user.repository.UserRepository;
 public class IdeaServiceImpl implements IdeaService {
 
         @Autowired
-        public IdeaRepository ideaRepo;
+        private IdeaRepository ideaRepo;
 
         @Autowired
-        public UserRepository userRepo;
+        private UserRepository userRepo;
 
         @Override
         public IdeaResponse createIdea(IdeaRequest request) {
@@ -79,7 +80,7 @@ public class IdeaServiceImpl implements IdeaService {
         @Override
         public IdeaResponse getIdeaById(Long id) {
                 Idea idea = ideaRepo.findById(id)
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new IdeaNotFoundByIDException(
                                                 "Selected ID not found, please check and try again."));
 
                 IdeaResponse ideasRes = IdeaResponse.builder()
@@ -99,6 +100,12 @@ public class IdeaServiceImpl implements IdeaService {
         public void deleteIdeaById(Long id) {
                 Idea idea = ideaRepo.findById(id)
                                 .orElseThrow(() -> new IdeaNotFoundByIDException("Idea not found for id: " + id));
+
+                String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+                if (!idea.getCreatedBy().getEmail().equals(currentEmail)) {
+                        throw new UnauthorizedAccessException("You are not authorized to modify this idea.");
+                }
+
                 ideaRepo.delete(idea);
         }
 
@@ -106,6 +113,11 @@ public class IdeaServiceImpl implements IdeaService {
         public IdeaResponse updateIdeaById(Long id, IdeaRequest request) {
                 Idea idea = ideaRepo.findById(id)
                                 .orElseThrow(() -> new IdeaNotFoundByIDException("Idea not found for this Id"));
+
+                String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+                if (!idea.getCreatedBy().getEmail().equals(currentEmail)) {
+                        throw new UnauthorizedAccessException("You are not authorized to modify this idea.");
+                }
 
                 idea.setTitle(request.getTitle());
                 idea.setDescription(request.getDescription());
@@ -131,6 +143,11 @@ public class IdeaServiceImpl implements IdeaService {
 
                 Idea idea = ideaRepo.findById(id)
                                 .orElseThrow(() -> new IdeaNotFoundByIDException("Idea not found for id: " + id));
+
+                String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+                if (!idea.getCreatedBy().getEmail().equals(currentEmail)) {
+                        throw new UnauthorizedAccessException("You are not authorized to modify this idea.");
+                }
 
                 if (request.getTitle() != null)
                         idea.setTitle(request.getTitle());

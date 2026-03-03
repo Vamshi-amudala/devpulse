@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.idea.dto.IdeaRequest;
 import com.example.idea.dto.IdeaResponse;
-import com.example.idea.service.IdeaServiceImpl;
+import com.example.idea.service.IdeaService;
 
 import jakarta.validation.Valid;
 
@@ -28,7 +28,7 @@ import jakarta.validation.Valid;
 public class IdeaController {
 
     @Autowired
-    public IdeaServiceImpl ideaService;
+    private IdeaService ideaService;
 
     @PostMapping("/create")
     public ResponseEntity<IdeaResponse> createIdea(@Valid @RequestBody IdeaRequest request) {
