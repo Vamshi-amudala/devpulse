@@ -13,4 +13,10 @@ public interface IdeaService {
     Page<IdeaResponse> getAllIdeas(Pageable pageable);
 
     IdeaResponse getIdeaById(Long id);
+
+    void deleteIdeaById(Long id);
+
+    IdeaResponse patchIdeaById(Long id, IdeaRequest request);
+
+    IdeaResponse updateIdeaById(Long id, IdeaRequest request);
 }
