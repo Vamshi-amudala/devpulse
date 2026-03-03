@@ -77,8 +77,20 @@ public class IdeaServiceImpl implements IdeaService {
 
     @Override
     public IdeaResponse getIdeaById(Long id) {
-        // TODO Auto-generated method stub
-        return null;
+        Idea idea = ideaRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Selected ID not found, please check and try again."));
+
+        IdeaResponse ideasRes = IdeaResponse.builder()
+                .id(idea.getId())
+                .title(idea.getTitle())
+                .description(idea.getDescription())
+                .techStack(idea.getTechStack())
+                .difficulty(idea.getDifficulty())
+                .createdBy(idea.getCreatedBy().getEmail())
+                .createdAt(idea.getCreatedAt())
+                .build();
+
+        return ideasRes;
     }
 
 }
