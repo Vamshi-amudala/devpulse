@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.example.github.service.GithubService;
 import com.example.idea.entity.Idea;
 import com.example.idea.exception.IdeaNotFoundByIDException;
 import com.example.idea.exception.UnauthorizedAccessException;
@@ -31,6 +32,9 @@ public class ImplementationServiceImpl implements ImplementationService {
         @Autowired
         private IdeaRepository ideaRepo;
 
+        @Autowired
+        private GithubService githubService;
+
         @Override
         public ImplementationResponse createImplementation(Long ideaId, ImplementationRequest request) {
 
@@ -43,10 +47,12 @@ public class ImplementationServiceImpl implements ImplementationService {
 
                 Implementation impl = Implementation.builder()
                                 .githubUrl(request.getGithubUrl())
-                                .repoName(request.getRepoName())
                                 .idea(idea)
                                 .submittedBy(user)
                                 .build();
+
+                // Fetch details from GitHub API
+                githubService.enrichImplementation(impl);
 
                 Implementation saved = impRepo.save(impl);
 
