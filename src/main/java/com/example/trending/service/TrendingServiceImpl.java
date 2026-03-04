@@ -20,6 +20,8 @@ public class TrendingServiceImpl implements TrendingService {
     @Cacheable(value = "trending", key = "#limit")
     @Override
     public List<TrendingResponse> getTopTrending(int limit) {
+        if (limit <= 0)
+            limit = 10;
         List<Object[]> rows = voteRepo.findTopImplementations(PageRequest.of(0, limit));
 
         List<TrendingResponse> result = new java.util.ArrayList<>();

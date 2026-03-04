@@ -44,6 +44,14 @@ public class AdminServiceImpl implements AdminService {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException(
                         "User not found for id: " + userId));
+
+        // Delete ideas first (cascade deletes their implementations + votes)
+        ideaRepo.deleteAll(ideaRepo.findByCreatedById(userId));
+
+        // Delete any remaining implementations submitted by this user (not linked to
+        // their own ideas)
+        impRepo.deleteAll(impRepo.findBySubmittedById(userId));
+
         userRepo.delete(user);
     }
 
