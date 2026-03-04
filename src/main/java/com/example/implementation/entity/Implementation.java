@@ -1,9 +1,14 @@
 package com.example.implementation.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.example.idea.entity.Idea;
 import com.example.user.entity.User;
+import com.example.vote.entity.Vote;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,6 +17,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -35,6 +41,8 @@ public class Implementation {
     private String githubUrl;
 
     private String repoName;
+
+    @Builder.Default
     private Integer stars = 0;
 
     private String primaryLanguage;
@@ -50,6 +58,10 @@ public class Implementation {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "submitted_by", nullable = false)
     private User submittedBy;
+
+    @OneToMany(mappedBy = "implementation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Vote> votes = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

@@ -14,6 +14,7 @@ import com.example.idea.repository.IdeaRepository;
 import com.example.implementation.dto.ImplementationRequest;
 import com.example.implementation.dto.ImplementationResponse;
 import com.example.implementation.entity.Implementation;
+import com.example.implementation.exception.ImplementationNotFoundException;
 import com.example.implementation.repository.ImplementationRepository;
 import com.example.user.entity.User;
 import com.example.user.repository.UserRepository;
@@ -84,7 +85,8 @@ public class ImplementationServiceImpl implements ImplementationService {
         @Override
         public void deleteImplementation(Long id) {
                 Implementation impl = impRepo.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Implementation not found"));
+                                .orElseThrow(() -> new ImplementationNotFoundException(
+                                                "Implementation not found for id: " + id));
 
                 String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
                 if (!impl.getSubmittedBy().getEmail().equals(currentEmail)) {
