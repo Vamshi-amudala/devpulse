@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class TrendingResponse {
+public class TrendingResponse implements java.io.Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long implementationId;
     private String githubUrl;

@@ -3,6 +3,7 @@ package com.example.trending.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ public class TrendingServiceImpl implements TrendingService {
     @Autowired
     private VoteRepository voteRepo;
 
+    @Cacheable(value = "trending", key = "#limit")
     @Override
     public List<TrendingResponse> getTopTrending(int limit) {
         List<Object[]> rows = voteRepo.findTopImplementations(PageRequest.of(0, limit));
