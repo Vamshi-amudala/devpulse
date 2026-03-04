@@ -58,7 +58,7 @@ public class IdeaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<IdeaResponse> updateById(@PathVariable Long id,
-            @RequestBody IdeaRequest request) {
+            @Valid @RequestBody IdeaRequest request) {
 
         return new ResponseEntity<>(ideaService.updateIdeaById(id, request), HttpStatus.OK);
     }
