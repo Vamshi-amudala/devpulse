@@ -13,7 +13,7 @@ import com.example.user.repository.UserRepository;
 public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
-    public UserRepository userRepo;
+    private UserRepository userRepo;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

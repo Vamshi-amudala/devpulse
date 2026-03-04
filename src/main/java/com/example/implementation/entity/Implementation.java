@@ -1,7 +1,7 @@
-package com.example.idea.entity;
+package com.example.implementation.entity;
 
 import java.time.LocalDateTime;
-
+import com.example.idea.entity.Idea;
 import com.example.user.entity.User;
 
 import jakarta.persistence.Column;
@@ -20,32 +20,36 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "ideas")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "implementations")
 @Builder
-public class Idea {
+public class Implementation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String title;
+    private String githubUrl;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String description;
+    private String repoName;
+    private Integer stars = 0;
 
-    private String difficulty;
+    private String primaryLanguage;
 
-    private String techStack;
+    private LocalDateTime lastCommitDate;
 
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy;
+    @JoinColumn(name = "idea_id", nullable = false)
+    private Idea idea;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "submitted_by", nullable = false)
+    private User submittedBy;
 
     @PrePersist
     public void prePersist() {

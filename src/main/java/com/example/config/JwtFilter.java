@@ -20,10 +20,10 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
-    public JwtUtil jwtUtils;
+    private JwtUtil jwtUtils;
 
     @Autowired
-    public UserDetailsService userDetailService;
+    private UserDetailsService userDetailService;
 
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -36,7 +36,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-            email = jwtUtils.extractEmail(token);
+            try {
+                email = jwtUtils.extractEmail(token);
+            } catch (Exception e) {
+                // Invalid/malformed token — skip and continue unauthenticated
+            }
         }
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
