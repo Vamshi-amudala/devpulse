@@ -20,4 +20,7 @@ public class ImplementationResponse {
     private String primaryLanguage;
     private String submittedBy;
     private LocalDateTime createdAt;
+    private String approachDescription;
+    private int votes;
+
 }

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.Collate;
+
 import com.example.idea.entity.Idea;
 import com.example.user.entity.User;
 import com.example.vote.entity.Vote;
@@ -22,11 +24,13 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "implementations")
@@ -62,6 +66,9 @@ public class Implementation {
     @OneToMany(mappedBy = "implementation", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Vote> votes = new ArrayList<>();
+
+    @Column(columnDefinition = "TEXT")
+    private String approachDescription;
 
     @PrePersist
     public void prePersist() {

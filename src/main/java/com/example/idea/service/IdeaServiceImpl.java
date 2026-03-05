@@ -39,7 +39,7 @@ public class IdeaServiceImpl implements IdeaService {
                                 .title(request.getTitle())
                                 .description(request.getDescription())
                                 .difficulty(request.getDifficulty())
-                                .techStack(request.getTechStacks())
+                                .techStack(request.getTechStack())
                                 .createdBy(user)
                                 .build();
 
@@ -89,7 +89,7 @@ public class IdeaServiceImpl implements IdeaService {
                                 .description(idea.getDescription())
                                 .techStack(idea.getTechStack())
                                 .difficulty(idea.getDifficulty())
-                                .createdBy(idea.getCreatedBy().getEmail())
+                                .createdBy(idea.getCreatedBy() != null ? idea.getCreatedBy().getEmail() : null)
                                 .createdAt(idea.getCreatedAt())
                                 .build();
 
@@ -122,7 +122,7 @@ public class IdeaServiceImpl implements IdeaService {
                 idea.setTitle(request.getTitle());
                 idea.setDescription(request.getDescription());
                 idea.setDifficulty(request.getDifficulty());
-                idea.setTechStack(request.getTechStacks());
+                idea.setTechStack(request.getTechStack());
 
                 Idea updated = ideaRepo.save(idea);
 
@@ -155,8 +155,8 @@ public class IdeaServiceImpl implements IdeaService {
                         idea.setDescription(request.getDescription());
                 if (request.getDifficulty() != null)
                         idea.setDifficulty(request.getDifficulty());
-                if (request.getTechStacks() != null)
-                        idea.setTechStack(request.getTechStacks());
+                if (request.getTechStack() != null)
+                        idea.setTechStack(request.getTechStack());
 
                 Idea updated = ideaRepo.save(idea);
 

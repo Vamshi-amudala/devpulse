@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.email.service.EmailService;
 import com.example.github.service.GithubService;
 import com.example.idea.entity.Idea;
 import com.example.idea.exception.IdeaNotFoundByIDException;
@@ -21,6 +23,7 @@ import com.example.user.entity.User;
 import com.example.user.repository.UserRepository;
 
 @Service
+@Transactional
 public class ImplementationServiceImpl implements ImplementationService {
 
         @Autowired
@@ -35,6 +38,9 @@ public class ImplementationServiceImpl implements ImplementationService {
         @Autowired
         private GithubService githubService;
 
+        @Autowired
+        private EmailService emailService;
+
         @Override
         public ImplementationResponse createImplementation(Long ideaId, ImplementationRequest request) {
 
@@ -47,6 +53,7 @@ public class ImplementationServiceImpl implements ImplementationService {
 
                 Implementation impl = Implementation.builder()
                                 .githubUrl(request.getGithubUrl())
+                                .approachDescription(request.getApproachDescription())
                                 .idea(idea)
                                 .submittedBy(user)
                                 .build();
@@ -55,6 +62,17 @@ public class ImplementationServiceImpl implements ImplementationService {
                 githubService.enrichImplementation(impl);
 
                 Implementation saved = impRepo.save(impl);
+
+                // Send email notification to the Idea creator if they are not the one
+                // submitting
+                // the implementation.
+                if (!idea.getCreatedBy().getEmail().equals(user.getEmail())) {
+                        emailService.sendImplementationNotificationEmail(
+                                        idea.getCreatedBy().getEmail(),
+                                        idea.getTitle(),
+                                        user.getName(),
+                                        saved.getRepoName());
+                }
 
                 return ImplementationResponse.builder()
                                 .id(saved.getId())
@@ -66,6 +84,8 @@ public class ImplementationServiceImpl implements ImplementationService {
                                 .primaryLanguage(saved.getPrimaryLanguage())
                                 .submittedBy(user.getEmail())
                                 .createdAt(saved.getCreatedAt())
+                                .approachDescription(saved.getApproachDescription())
+                                .votes(0) // 0 votes on creation
                                 .build();
         }
 
@@ -84,6 +104,8 @@ public class ImplementationServiceImpl implements ImplementationService {
                                                 .primaryLanguage(impl.getPrimaryLanguage())
                                                 .submittedBy(impl.getSubmittedBy().getEmail())
                                                 .createdAt(impl.getCreatedAt())
+                                                .approachDescription(impl.getApproachDescription())
+                                                .votes(impl.getVotes() != null ? impl.getVotes().size() : 0)
                                                 .build())
                                 .toList();
         }

@@ -11,6 +11,9 @@ import com.example.implementation.repository.ImplementationRepository;
 import com.example.user.dto.UserResponse;
 import com.example.user.entity.User;
 import com.example.user.repository.UserRepository;
+import com.example.vote.repository.VoteRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -23,6 +26,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Autowired
     private ImplementationRepository impRepo;
+
+    @Autowired
+    private VoteRepository voteRepo;
 
     // ─── Users ───────────────────────────────────────────────────────────────
 
@@ -39,20 +45,13 @@ public class AdminServiceImpl implements AdminService {
                 .toList();
     }
 
+    @Transactional
     @Override
     public void deleteUser(Long userId) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException(
-                        "User not found for id: " + userId));
-
-        // Delete ideas first (cascade deletes their implementations + votes)
+        voteRepo.deleteByUserId(userId);
         ideaRepo.deleteAll(ideaRepo.findByCreatedById(userId));
-
-        // Delete any remaining implementations submitted by this user (not linked to
-        // their own ideas)
         impRepo.deleteAll(impRepo.findBySubmittedById(userId));
-
-        userRepo.delete(user);
+        userRepo.deleteById(userId);
     }
 
     // ─── Ideas ───────────────────────────────────────────────────────────────

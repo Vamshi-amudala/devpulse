@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,16 +19,17 @@ import com.example.github.dto.GitHubResponseDTO;
 import com.example.implementation.entity.Implementation;
 import com.example.implementation.repository.ImplementationRepository;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class GithubServiceImpl implements GithubService {
 
-    private final RestTemplate restTemplate;
-    private final ImplementationRepository implementationRepository;
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private ImplementationRepository implementationRepository;
 
     @Value("${github.token}")
     private String githubToken;
