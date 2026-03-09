@@ -2,10 +2,13 @@ package com.example.idea.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class IdeaRequest {
 
     @NotBlank
@@ -16,6 +19,6 @@ public class IdeaRequest {
 
     private String difficulty;
 
-    private String techStacks;
+    private String techStack;
 
 }

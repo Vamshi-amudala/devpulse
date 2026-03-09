@@ -1,0 +1,223 @@
+# Guide to Testing in Spring Boot
+
+Testing is a fantastic way to ensure your code works exactly as you expect and doesn't break when you make changes later! In a Spring Boot app like DevPulse, we generally write two types of tests: **Unit Tests** and **Integration Tests**.
+
+---
+
+## 1. The Basics: What are we testing?
+
+- **Unit Tests (`@ExtendWith(MockitoExtension.class)`)**: We test a *single* class in isolation. For example, testing [UserServiceImpl](file:///c:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/user/service/UserServiceImpl.java#15-64). Since it depends on [UserRepository](file:///C:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/user/repository/UserRepository.java#10-18), we "mock" (fake) the repository so we aren't actually calling the database. This makes tests extremely fast.
+- **Integration Tests (`@SpringBootTest`, `@DataJpaTest`, or `@WebMvcTest`)**: We test how multiple parts of the application work *together*. For example, testing the [UserController](file:///C:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/user/controller/UserController.java#16-46) all the way down to the database to ensure the whole flow works.
+
+Let's start with Unit Tests, as they are the easiest to write and run!
+
+---
+
+## 2. Setting Up Your First Unit Test
+
+Let's write a unit test for your [IdeaServiceImpl](file:///C:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/idea/service/IdeaServiceImpl.java#20-175)! We want to test the [getIdeaById](file:///C:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/idea/service/IdeaServiceImpl.java#80-98) method to ensure it correctly fetches an idea, and correctly throws an exception if the idea doesn't exist.
+
+### Step 1: Create the Test File
+You have your main code in [src/main/java/com/example/idea/service/IdeaServiceImpl.java](file:///C:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/idea/service/IdeaServiceImpl.java).
+Your tests should mirror this structure in the `test` directory! 
+
+Create this file: `src/test/java/com/example/idea/service/IdeaServiceImplTest.java`
+
+### Step 2: The Basic Structure
+
+Here is how you set up a test file using Mockito (a library that creates "fake" objects):
+
+```java
+package com.example.idea.service;
+
+import static org.junit.jupiter.api.Assertions.*; // For checking results
+import static org.mockito.Mockito.*; // For mocking
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.example.idea.dto.IdeaResponse;
+import com.example.idea.entity.Idea;
+import com.example.idea.exception.IdeaNotFoundByIDException;
+import com.example.idea.repository.IdeaRepository;
+import com.example.user.entity.User;
+
+// 1. Tell JUnit to use Mockito to handle our fake objects
+@ExtendWith(MockitoExtension.class) 
+class IdeaServiceImplTest {
+
+    // 2. Create FAKE versions of the dependencies IdeaServiceImpl needs
+    @Mock
+    private IdeaRepository ideaRepo;
+
+    // 3. Inject the fake objects into the REAL service we want to test
+    @InjectMocks
+    private IdeaServiceImpl ideaService;
+
+    // We will put our tests here!
+}
+```
+
+---
+
+## 3. Writing Your First Test: The "Happy Path"
+
+Let's test the scenario where the idea *is* found successfully. Every good test follows a pattern called **Arrange, Act, Assert (AAA)**.
+
+Add this method inside `IdeaServiceImplTest`:
+
+```java
+    @Test
+    void getIdeaById_WhenIdeaExists_ShouldReturnIdeaResponse() {
+        // --- ARRANGE ---
+        // 1. Prepare fake data
+        Long ideaId = 1L;
+        User fakeUser = new User();
+        fakeUser.setEmail("test@example.com");
+
+        Idea fakeIdea = new Idea();
+        fakeIdea.setId(ideaId);
+        fakeIdea.setTitle("Test Title");
+        fakeIdea.setCreatedBy(fakeUser);
+        fakeIdea.setCreatedAt(LocalDateTime.now());
+
+        // 2. Tell our fake repository what to do!
+        // "When someone asks for an idea with ID 1, return this fakeIdea"
+        when(ideaRepo.findById(ideaId)).thenReturn(Optional.of(fakeIdea));
+
+        // --- ACT ---
+        // Run the actual method we are testing
+        IdeaResponse result = ideaService.getIdeaById(ideaId);
+
+        // --- ASSERT ---
+        // Check if the result was what we expected
+        assertNotNull(result); // Result shouldn't be null
+        assertEquals(ideaId, result.getId()); // ID should match
+        assertEquals("Test Title", result.getTitle()); // Title should match
+        assertEquals("test@example.com", result.getCreatedBy()); // Email should match
+    }
+```
+
+---
+
+## 4. Writing Your Second Test: The "Unhappy Path"
+
+What if the idea doesn't exist? [IdeaServiceImpl](file:///C:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/idea/service/IdeaServiceImpl.java#20-175) is supposed to throw [IdeaNotFoundByIDException](file:///C:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/idea/exception/IdeaNotFoundByIDException.java#6-17). Let's test that!
+
+Add this second method to your test class:
+
+```java
+    @Test
+    void getIdeaById_WhenIdeaDoesNotExist_ShouldThrowException() {
+        // --- ARRANGE ---
+        Long ideaId = 99L;
+        // Tell the fake repository to return empty (not found)
+        when(ideaRepo.findById(ideaId)).thenReturn(Optional.empty());
+
+        // --- ACT & ASSERT ---
+        // Check that calling the method throws the exact exception we expect
+        assertThrows(IdeaNotFoundByIDException.class, () -> {
+            ideaService.getIdeaById(ideaId);
+        });
+    }
+```
+
+---
+
+## Your Turn!
+
+I've written a guide explaining how to write test for `IdeaServiceImpl.getIdeaById()`. 
+
+**Try this on your own:**
+1. Create the `IdeaServiceImplTest.java` file in `src/test/java/com/example/idea/service/`.
+2. Copy the code from this guide into that file.
+3. Try to run the tests in your IDE (usually by clicking the green play button next to the class name or running `mvn test` in the terminal).
+
+Once you get those two tests passing, let me know, and I can guide you on how to test other things like Controllers or the [UserService](file:///C:/Users/vamsh/.sping/DevPulse/src/main/java/com/example/user/service/UserService.java#6-13)!
+
+---
+
+## 5. Testing a Controller (Web Layer)
+
+Testing controllers is slightly different. Instead of just calling a method, we want to simulate a real HTTP request (like a POST or GET) hitting your endpoint. 
+
+Spring provides `@WebMvcTest` and `MockMvc` for this. This tests the web layer without starting the full server, while still mocking the service layer.
+
+Let's test the `UserController.register` endpoint. Create `src/test/java/com/example/user/controller/UserControllerTest.java`:
+
+```java
+package com.example.user.controller;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.example.user.dto.RegisterRequest;
+import com.example.user.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+// 1. Tell Spring to only load the web layer for UserController
+@WebMvcTest(UserController.class)
+@AutoConfigureMockMvc(addFilters = false) // Disable security filters for this simple test
+class UserControllerTest {
+
+    // 2. MockMvc allows us to send fake HTTP requests
+    @Autowired
+    private MockMvc mockMvc;
+
+    // 3. We mock the service layer because we are only testing the controller
+    @MockBean
+    private UserService userService;
+
+    // 4. ObjectMapper converts Java objects to JSON
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Test
+    void register_WithValidRequest_ShouldReturnCreated() throws Exception {
+        // --- ARRANGE ---
+        RegisterRequest request = new RegisterRequest();
+        request.setName("Test User");
+        request.setEmail("test@email.com");
+        request.setPassword("P@ssword123");
+
+        // The register method returns void, so we tell Mockito to "do nothing" when it's called
+        doNothing().when(userService).register(any(RegisterRequest.class));
+
+        // --- ACT & ASSERT ---
+        // Perform a POST request to /api/users/register
+        mockMvc.perform(post("/api/users/register")
+                .contentType(MediaType.APPLICATION_JSON) // We are sending JSON
+                .content(objectMapper.writeValueAsString(request))) // Convert our Java object to JSON string
+                
+                // Assert the HTTP status is 201 CREATED
+                .andExpect(status().isCreated())
+                
+                // Assert the response body contains our success message
+                .andExpect(content().string("User registered successfully."));
+    }
+}
+```
+
+### Key Differences for Controllers:
+1. We use **`@WebMvcTest`** and **`@MockBean`** instead of `@ExtendWith(MockitoExtension.class)` and `@Mock`. This is because we need Spring to partially boot up to handle the HTTP stuff.
+2. We use **`MockMvc`** to simulate the user making a request (POST, GET, etc.).
+3. We use **`.andExpect()`** to assert the HTTP status code and response body, rather than standard JUnit assertions like `assertEquals()`.
+
+Now you have a complete guide! Try implementing the `IdeaServiceImplTest` first, make sure it passes, and then give the `UserControllerTest` a try!

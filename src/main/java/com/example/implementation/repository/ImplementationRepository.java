@@ -10,4 +10,6 @@ import com.example.implementation.entity.Implementation;
 @Repository
 public interface ImplementationRepository extends JpaRepository<Implementation, Long> {
     List<Implementation> findByIdeaId(Long ideaId);
+
+    List<Implementation> findBySubmittedById(Long userId);
 }
