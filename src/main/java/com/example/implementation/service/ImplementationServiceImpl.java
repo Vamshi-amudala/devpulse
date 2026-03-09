@@ -64,8 +64,7 @@ public class ImplementationServiceImpl implements ImplementationService {
                 Implementation saved = impRepo.save(impl);
 
                 // Send email notification to the Idea creator if they are not the one
-                // submitting
-                // the implementation.
+                // submitting the implementation.
                 if (!idea.getCreatedBy().getEmail().equals(user.getEmail())) {
                         emailService.sendImplementationNotificationEmail(
                                         idea.getCreatedBy().getEmail(),

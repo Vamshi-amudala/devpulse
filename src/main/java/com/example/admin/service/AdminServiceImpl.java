@@ -9,7 +9,6 @@ import com.example.idea.dto.IdeaResponse;
 import com.example.idea.repository.IdeaRepository;
 import com.example.implementation.repository.ImplementationRepository;
 import com.example.user.dto.UserResponse;
-// import com.example.user.entity.User;
 import com.example.user.repository.UserRepository;
 import com.example.vote.repository.VoteRepository;
 
