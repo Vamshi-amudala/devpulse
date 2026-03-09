@@ -20,5 +20,11 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
     @Query("SELECT v.implementation, COUNT(v) FROM Vote v GROUP BY v.implementation ORDER BY COUNT(v) DESC")
     List<Object[]> findTopImplementations(Pageable pageable);
 
+    @Query("SELECT v.implementation.idea, SUM(1), COUNT(DISTINCT v.implementation) " +
+            "FROM Vote v " +
+            "GROUP BY v.implementation.idea " +
+            "ORDER BY SUM(1) DESC")
+    List<Object[]> findTopIdeasByVotes(Pageable pageable);
+
     void deleteByUserId(Long id);
 }

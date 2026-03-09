@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.trending.service.TrendingService;
+import com.example.vote.dto.TrendingIdeaResponse;
 import com.example.vote.dto.TrendingResponse;
 
 @RestController
@@ -20,10 +21,19 @@ public class TrendingController {
     @Autowired
     private TrendingService trendingService;
 
+    // GET /api/trending?limit=10 → top implementations by votes
     @GetMapping
     public ResponseEntity<List<TrendingResponse>> getTrending(
             @RequestParam(defaultValue = "10") int limit) {
 
         return new ResponseEntity<>(trendingService.getTopTrending(limit), HttpStatus.OK);
+    }
+
+    // GET /api/trending/ideas?limit=10 → top ideas by total votes across all impls
+    @GetMapping("/ideas")
+    public ResponseEntity<List<TrendingIdeaResponse>> getTrendingIdeas(
+            @RequestParam(defaultValue = "10") int limit) {
+
+        return new ResponseEntity<>(trendingService.getTopTrendingIdeas(limit), HttpStatus.OK);
     }
 }
