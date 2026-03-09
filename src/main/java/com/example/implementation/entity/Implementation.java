@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.Collate;
+// import org.hibernate.annotations.Collate;
 
 import com.example.idea.entity.Idea;
 import com.example.user.entity.User;
