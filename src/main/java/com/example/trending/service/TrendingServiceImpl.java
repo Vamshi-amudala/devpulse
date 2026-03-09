@@ -1,5 +1,6 @@
 package com.example.trending.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.example.idea.entity.Idea;
 import com.example.implementation.entity.Implementation;
+import com.example.vote.dto.TrendingIdeaResponse;
 import com.example.vote.dto.TrendingResponse;
 import com.example.vote.repository.VoteRepository;
 
@@ -25,7 +28,7 @@ public class TrendingServiceImpl implements TrendingService {
 
         List<Object[]> rows = voteRepo.findTopImplementations(PageRequest.of(0, limit));
 
-        List<TrendingResponse> result = new java.util.ArrayList<>();
+        List<TrendingResponse> result = new ArrayList<>();
 
         for (Object[] row : rows) {
             Implementation impl = (Implementation) row[0];
@@ -40,6 +43,36 @@ public class TrendingServiceImpl implements TrendingService {
                     .submittedBy(impl.getSubmittedBy().getEmail())
                     .ideaTitle(impl.getIdea().getTitle())
                     .voteCount(voteCount)
+                    .build());
+        }
+
+        return result;
+    }
+
+    @Cacheable(value = "trendingIdeas", key = "#limit")
+    @Override
+    public List<TrendingIdeaResponse> getTopTrendingIdeas(int limit) {
+        if (limit <= 0)
+            limit = 10;
+
+        List<Object[]> rows = voteRepo.findTopIdeasByVotes(PageRequest.of(0, limit));
+
+        List<TrendingIdeaResponse> result = new ArrayList<>();
+
+        for (Object[] row : rows) {
+            Idea idea = (Idea) row[0];
+            Long totalVotes = (Long) row[1];
+            Long implCount = (Long) row[2];
+
+            result.add(TrendingIdeaResponse.builder()
+                    .ideaId(idea.getId())
+                    .ideaTitle(idea.getTitle())
+                    .ideaDescription(idea.getDescription())
+                    .difficulty(idea.getDifficulty())
+                    .techStack(idea.getTechStack())
+                    .createdBy(idea.getCreatedBy().getEmail())
+                    .totalVotes(totalVotes)
+                    .implCount(implCount.intValue())
                     .build());
         }
 

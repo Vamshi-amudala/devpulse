@@ -106,6 +106,7 @@ public class ImplementationServiceImpl implements ImplementationService {
                                                 .approachDescription(impl.getApproachDescription())
                                                 .votes(impl.getVotes() != null ? impl.getVotes().size() : 0)
                                                 .build())
+                                .sorted((a, b) -> Integer.compare(b.getVotes(), a.getVotes()))
                                 .toList();
         }
 
