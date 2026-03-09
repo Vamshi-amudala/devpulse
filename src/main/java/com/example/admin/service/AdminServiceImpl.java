@@ -9,8 +9,10 @@ import com.example.idea.dto.IdeaResponse;
 import com.example.idea.repository.IdeaRepository;
 import com.example.implementation.repository.ImplementationRepository;
 import com.example.user.dto.UserResponse;
-import com.example.user.entity.User;
 import com.example.user.repository.UserRepository;
+import com.example.vote.repository.VoteRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -23,6 +25,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Autowired
     private ImplementationRepository impRepo;
+
+    @Autowired
+    private VoteRepository voteRepo;
 
     // ─── Users ───────────────────────────────────────────────────────────────
 
@@ -39,12 +44,13 @@ public class AdminServiceImpl implements AdminService {
                 .toList();
     }
 
+    @Transactional
     @Override
     public void deleteUser(Long userId) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException(
-                        "User not found for id: " + userId));
-        userRepo.delete(user);
+        voteRepo.deleteByUserId(userId);
+        ideaRepo.deleteAll(ideaRepo.findByCreatedById(userId));
+        impRepo.deleteAll(impRepo.findBySubmittedById(userId));
+        userRepo.deleteById(userId);
     }
 
     // ─── Ideas ───────────────────────────────────────────────────────────────

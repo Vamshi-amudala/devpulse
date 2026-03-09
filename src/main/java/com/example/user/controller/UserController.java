@@ -7,8 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.user.dto.ForgotPasswordRequest;
 import com.example.user.dto.LoginRequestDto;
 import com.example.user.dto.RegisterRequest;
+import com.example.user.dto.ResetPasswordRequest;
 import com.example.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -40,6 +42,19 @@ public class UserController {
         String email = authentication.getName();
         String role = authentication.getAuthorities().iterator().next().getAuthority();
         return ResponseEntity.ok(Map.of("email", email, "role", role));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest dto) {
+        userService.forgotPassword(dto);
+        return ResponseEntity
+                .ok("If that email address is in our database, we will send you an email to reset your password.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest dto) {
+        userService.resetPassword(dto);
+        return ResponseEntity.ok("Password has been reset successfully. You can now login with your new password.");
     }
 
 }

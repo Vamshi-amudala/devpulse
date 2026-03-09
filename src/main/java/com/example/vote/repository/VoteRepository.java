@@ -20,4 +20,5 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
     @Query("SELECT v.implementation, COUNT(v) FROM Vote v GROUP BY v.implementation ORDER BY COUNT(v) DESC")
     List<Object[]> findTopImplementations(Pageable pageable);
 
+    void deleteByUserId(Long id);
 }
