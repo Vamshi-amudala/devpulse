@@ -2,7 +2,7 @@ name: DevPulse CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
 
