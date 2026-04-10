@@ -16,4 +16,7 @@ public class IdeaResponse {
     private String techStack;
     private String createdBy;
     private LocalDateTime createdAt;
+
+    private Integer implementationCount;
+    private Integer upVoteCount;
 }
