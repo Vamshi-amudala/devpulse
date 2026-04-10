@@ -17,6 +17,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -33,7 +34,10 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "implementations")
+@Table(name = "implementations", indexes = {
+    @Index(name = "idx_impl_idea_id", columnList = "idea_id"),
+    @Index(name = "idx_impl_submitted_by", columnList = "submitted_by")
+})
 @Builder
 public class Implementation {
 

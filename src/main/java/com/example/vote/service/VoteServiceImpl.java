@@ -3,6 +3,8 @@ package com.example.vote.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,10 @@ public class VoteServiceImpl implements VoteService {
     private ImplementationRepository impRepo;
 
     @Override
+    @Caching(evict = {
+        @CacheEvict(value = "trending", allEntries = true),
+        @CacheEvict(value = "trendingIdeas", allEntries = true)
+    })
     public String vote(Long implementationId) {
 
         // 1. Get current user

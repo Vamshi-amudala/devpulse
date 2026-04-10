@@ -2,6 +2,8 @@ package com.example.config;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +20,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtFilter.class);
 
     @Autowired
     private JwtUtil jwtUtils;
@@ -39,27 +43,30 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 email = jwtUtils.extractEmail(token);
             } catch (Exception e) {
-                // Invalid/malformed token — skip and continue unauthenticated
+                log.warn("JWT token parsing failed for request [{}]: {}", request.getRequestURI(), e.getMessage());
             }
         }
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                UserDetails userDetails = userDetailService.loadUserByUsername(email);
 
-            UserDetails userDetails = userDetailService.loadUserByUsername(email);
-
-            if (jwtUtils.isValidToken(token, email)) {
-
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-                        null,
-                        userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                if (jwtUtils.isValidToken(token, email)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    log.debug("Authenticated user [{}] for request [{}]", email, request.getRequestURI());
+                } else {
+                    log.warn("JWT token is invalid or expired for user [{}] on request [{}]",
+                            email, request.getRequestURI());
+                }
+            } catch (Exception e) {
+                log.error("Could not authenticate user [{}]: {}", email, e.getMessage());
             }
         }
 
         filterChain.doFilter(request, response);
-
     }
-
 }
+

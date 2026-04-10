@@ -1,5 +1,7 @@
 package com.example.idea.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +34,6 @@ public class IdeaController {
 
     @PostMapping("/create")
     public ResponseEntity<IdeaResponse> createIdea(@Valid @RequestBody IdeaRequest request) {
-
         return new ResponseEntity<>(ideaService.createIdea(request), HttpStatus.CREATED);
     }
 
@@ -43,6 +44,12 @@ public class IdeaController {
 
         Pageable pageable = PageRequest.of(page, size);
         return new ResponseEntity<>(ideaService.getAllIdeas(pageable), HttpStatus.OK);
+    }
+
+    // Returns only the logged-in user's ideas (requires authentication)
+    @GetMapping("/my")
+    public ResponseEntity<List<IdeaResponse>> getMyIdeas() {
+        return ResponseEntity.ok(ideaService.getMyIdeas());
     }
 
     @GetMapping("/{id}")
@@ -59,7 +66,6 @@ public class IdeaController {
     @PutMapping("/{id}")
     public ResponseEntity<IdeaResponse> updateById(@PathVariable Long id,
             @Valid @RequestBody IdeaRequest request) {
-
         return new ResponseEntity<>(ideaService.updateIdeaById(id, request), HttpStatus.OK);
     }
 
@@ -68,5 +74,5 @@ public class IdeaController {
             @RequestBody IdeaRequest request) {
         return ResponseEntity.ok(ideaService.patchIdeaById(id, request));
     }
-
 }
+

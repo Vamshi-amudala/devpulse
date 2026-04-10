@@ -2,7 +2,6 @@ package com.example.github.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,20 +103,30 @@ public class GithubServiceImpl implements GithubService {
     @Override
     public void syncAllRepositories() {
         log.info("Starting scheduled GitHub sync for all implementations...");
-        List<Implementation> implementations = implementationRepository.findAll();
 
+        int pageSize = 50;
+        int page = 0;
         int successCount = 0;
-        for (Implementation impl : implementations) {
-            try {
-                enrichImplementation(impl);
-                implementationRepository.save(impl);
-                successCount++;
-            } catch (Exception e) {
-                log.error("Failed to sync repo for implementation ID {}: {}", impl.getId(), e.getMessage());
-            }
-        }
+        int totalCount = 0;
 
-        log.info("Completed GitHub sync. Successfully updated {}/{} repositories.", successCount,
-                implementations.size());
+        org.springframework.data.domain.Page<Implementation> batch;
+        do {
+            batch = implementationRepository.findAll(
+                    org.springframework.data.domain.PageRequest.of(page, pageSize));
+            totalCount += batch.getNumberOfElements();
+
+            for (Implementation impl : batch.getContent()) {
+                try {
+                    enrichImplementation(impl);
+                    implementationRepository.save(impl);
+                    successCount++;
+                } catch (Exception e) {
+                    log.error("Failed to sync repo for implementation ID {}: {}", impl.getId(), e.getMessage());
+                }
+            }
+            page++;
+        } while (batch.hasNext());
+
+        log.info("Completed GitHub sync. Successfully updated {}/{} repositories.", successCount, totalCount);
     }
 }

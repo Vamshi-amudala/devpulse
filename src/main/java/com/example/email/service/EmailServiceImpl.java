@@ -9,6 +9,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +32,8 @@ public class EmailServiceImpl implements EmailService {
             helper.setTo(toEmail);
             helper.setSubject("Welcome to DevPulse!");
 
-            String htmlContent = "<h2>Welcome to DevPulse, " + userName + "!</h2>"
+            String safeName = HtmlUtils.htmlEscape(userName);
+            String htmlContent = "<h2>Welcome to DevPulse, " + safeName + "!</h2>"
                     + "<p>We are thrilled to have you join our developer showcase platform.</p>"
                     + "<p>Start posting your project ideas and submitting implementations for others.</p>"
                     + "<br>"
@@ -57,6 +59,7 @@ public class EmailServiceImpl implements EmailService {
             helper.setTo(toEmail);
             helper.setSubject("DevPulse - Password Reset OTP");
 
+            // OTP is a server-generated 6-digit number — no escaping needed
             String htmlContent = "<h2>Password Reset</h2>"
                     + "<p>You requested a password reset. Here is your 6-digit OTP code:</p>"
                     + "<h1 style='color: #4CAF50; letter-spacing: 5px; font-size: 36px; padding: 10px; background-color: #f4f4f4; display: inline-block;'>"
@@ -75,8 +78,8 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Async
-    public void sendImplementationNotificationEmail(String toEmail, String ideaTitle, String implementerName,
-            String repoName) {
+    public void sendImplementationNotificationEmail(String toEmail, String ideaTitle,
+            String implementerName, String repoName) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -85,10 +88,16 @@ public class EmailServiceImpl implements EmailService {
             helper.setTo(toEmail);
             helper.setSubject("New Implementation Submitted for your Idea!");
 
+            // Escape all user-provided values to prevent HTML injection
+            String safeIdeaTitle = HtmlUtils.htmlEscape(ideaTitle);
+            String safeImplementerName = HtmlUtils.htmlEscape(implementerName);
+            String safeRepoName = HtmlUtils.htmlEscape(repoName);
+
             String htmlContent = "<h2>Good news!</h2>"
-                    + "<p>Someone has submitted an implementation for your idea: <strong>" + ideaTitle + "</strong></p>"
-                    + "<p><strong>" + implementerName + "</strong> just linked their GitHub repository: <strong>"
-                    + repoName + "</strong></p>"
+                    + "<p>Someone has submitted an implementation for your idea: <strong>"
+                    + safeIdeaTitle + "</strong></p>"
+                    + "<p><strong>" + safeImplementerName + "</strong> just linked their GitHub repository: <strong>"
+                    + safeRepoName + "</strong></p>"
                     + "<p>Check it out on DevPulse!</p>";
 
             helper.setText(htmlContent, true);

@@ -32,13 +32,16 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/forgot-password").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/reset-password").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/ideas/my").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/ideas/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/implementations/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/trending").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/trending/ideas").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

@@ -1,5 +1,7 @@
 package com.example.idea.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -45,36 +47,31 @@ public class IdeaServiceImpl implements IdeaService {
 
                 Idea saved = ideaRepo.save(idea);
 
-                IdeaResponse ideaResponse = IdeaResponse.builder()
+                return IdeaResponse.builder()
                                 .id(saved.getId())
                                 .title(saved.getTitle())
                                 .description(saved.getDescription())
                                 .difficulty(saved.getDifficulty())
                                 .techStack(saved.getTechStack())
-                                .createdBy(user.getEmail())
+                                .createdBy(user.getName())
                                 .createdAt(saved.getCreatedAt())
                                 .build();
-
-                return ideaResponse;
         }
 
         @Override
         public Page<IdeaResponse> getAllIdeas(Pageable pageable) {
 
-                Page<Idea> page = ideaRepo.findAll(pageable);
-
-                Page<IdeaResponse> ideasPage = page.map(idea -> IdeaResponse.builder()
-
-                                .id(idea.getId())
-                                .title(idea.getTitle())
-                                .description(idea.getDescription())
-                                .difficulty(idea.getDifficulty())
-                                .techStack(idea.getTechStack())
-                                .createdBy(idea.getCreatedBy() != null ? idea.getCreatedBy().getEmail() : null)
-                                .createdAt(idea.getCreatedAt())
-                                .build());
-
-                return ideasPage;
+                return ideaRepo.findAll(pageable)
+                                .map(idea -> IdeaResponse.builder()
+                                                .id(idea.getId())
+                                                .title(idea.getTitle())
+                                                .description(idea.getDescription())
+                                                .difficulty(idea.getDifficulty())
+                                                .techStack(idea.getTechStack())
+                                                .createdBy(idea.getCreatedBy() != null ? idea.getCreatedBy().getName()
+                                                                : null)
+                                                .createdAt(idea.getCreatedAt())
+                                                .build());
         }
 
         @Override
@@ -83,17 +80,15 @@ public class IdeaServiceImpl implements IdeaService {
                                 .orElseThrow(() -> new IdeaNotFoundByIDException(
                                                 "Selected ID not found, please check and try again."));
 
-                IdeaResponse ideasRes = IdeaResponse.builder()
+                return IdeaResponse.builder()
                                 .id(idea.getId())
                                 .title(idea.getTitle())
                                 .description(idea.getDescription())
                                 .techStack(idea.getTechStack())
                                 .difficulty(idea.getDifficulty())
-                                .createdBy(idea.getCreatedBy() != null ? idea.getCreatedBy().getEmail() : null)
+                                .createdBy(idea.getCreatedBy() != null ? idea.getCreatedBy().getName() : null)
                                 .createdAt(idea.getCreatedAt())
                                 .build();
-
-                return ideasRes;
         }
 
         @Override
@@ -132,10 +127,9 @@ public class IdeaServiceImpl implements IdeaService {
                                 .description(updated.getDescription())
                                 .difficulty(updated.getDifficulty())
                                 .techStack(updated.getTechStack())
-                                .createdBy(updated.getCreatedBy().getEmail())
+                                .createdBy(updated.getCreatedBy().getName())
                                 .createdAt(updated.getCreatedAt())
                                 .build();
-
         }
 
         @Override
@@ -166,9 +160,31 @@ public class IdeaServiceImpl implements IdeaService {
                                 .description(updated.getDescription())
                                 .difficulty(updated.getDifficulty())
                                 .techStack(updated.getTechStack())
-                                .createdBy(updated.getCreatedBy().getEmail())
+                                .createdBy(updated.getCreatedBy().getName())
                                 .createdAt(updated.getCreatedAt())
                                 .build();
         }
 
+        @Override
+        public List<IdeaResponse> getMyIdeas() {
+
+                String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+                User user = userRepo.findByEmail(email)
+                                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+                return ideaRepo.findByCreatedById(user.getId())
+                                .stream()
+                                .map(idea -> IdeaResponse.builder()
+                                                .id(idea.getId())
+                                                .title(idea.getTitle())
+                                                .description(idea.getDescription())
+                                                .difficulty(idea.getDifficulty())
+                                                .techStack(idea.getTechStack())
+                                                .createdBy(idea.getCreatedBy().getName())
+                                                .createdAt(idea.getCreatedAt())
+                                                .build())
+                                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                                .toList();
+        }
 }
