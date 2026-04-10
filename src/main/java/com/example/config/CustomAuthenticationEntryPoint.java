@@ -29,7 +29,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         Map<String, Object> body = new HashMap<>();
         body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         body.put("error", "Unauthorized");
-        body.put("message", "hey please register to vote"); // Your custom message
+        body.put("message", "Access denied: You must be logged in. Please provide a valid Bearer token.");
         body.put("path", request.getServletPath());
 
         // Write the JSON to the response body

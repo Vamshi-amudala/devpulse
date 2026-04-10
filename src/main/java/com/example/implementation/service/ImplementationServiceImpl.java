@@ -67,7 +67,7 @@ public class ImplementationServiceImpl implements ImplementationService {
                 // submitting the implementation.
                 if (!idea.getCreatedBy().getEmail().equals(user.getEmail())) {
                         emailService.sendImplementationNotificationEmail(
-                                        idea.getCreatedBy().getEmail(),
+                                        idea.getCreatedBy().getName(),
                                         idea.getTitle(),
                                         user.getName(),
                                         saved.getRepoName());
@@ -81,7 +81,7 @@ public class ImplementationServiceImpl implements ImplementationService {
                                 .repoName(saved.getRepoName())
                                 .stars(saved.getStars())
                                 .primaryLanguage(saved.getPrimaryLanguage())
-                                .submittedBy(user.getEmail())
+                                .submittedBy(user.getName())
                                 .createdAt(saved.getCreatedAt())
                                 .approachDescription(saved.getApproachDescription())
                                 .votes(0) // 0 votes on creation
@@ -101,7 +101,7 @@ public class ImplementationServiceImpl implements ImplementationService {
                                                 .repoName(impl.getRepoName())
                                                 .stars(impl.getStars())
                                                 .primaryLanguage(impl.getPrimaryLanguage())
-                                                .submittedBy(impl.getSubmittedBy().getEmail())
+                                                .submittedBy(impl.getSubmittedBy().getName())
                                                 .createdAt(impl.getCreatedAt())
                                                 .approachDescription(impl.getApproachDescription())
                                                 .votes(impl.getVotes() != null ? impl.getVotes().size() : 0)

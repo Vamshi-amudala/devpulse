@@ -1,5 +1,7 @@
 package com.example.idea.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -19,4 +21,7 @@ public interface IdeaService {
     IdeaResponse patchIdeaById(Long id, IdeaRequest request);
 
     IdeaResponse updateIdeaById(Long id, IdeaRequest request);
+
+    List<IdeaResponse> getMyIdeas();
 }
+
