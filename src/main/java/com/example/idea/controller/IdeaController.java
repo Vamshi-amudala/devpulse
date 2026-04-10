@@ -74,5 +74,19 @@ public class IdeaController {
             @RequestBody IdeaRequest request) {
         return ResponseEntity.ok(ideaService.patchIdeaById(id, request));
     }
+
+    // GET /api/ideas/search?keyword=java&techStack=spring&sortBy=votes&direction=desc&page=0&size=5
+    @GetMapping("/search")
+    public ResponseEntity<Page<IdeaResponse>> searchIdeas(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String techStack,
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(defaultValue = "date") String sortBy,      // date | difficulty | votes | implementations
+            @RequestParam(defaultValue = "desc") String direction,   // asc | desc
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        return ResponseEntity.ok(ideaService.searchIdeas(keyword, techStack, difficulty, sortBy, direction, page, size));
+    }
 }
 

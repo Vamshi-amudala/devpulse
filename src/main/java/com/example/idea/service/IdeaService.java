@@ -23,5 +23,7 @@ public interface IdeaService {
     IdeaResponse updateIdeaById(Long id, IdeaRequest request);
 
     List<IdeaResponse> getMyIdeas();
-}
 
+    Page<IdeaResponse> searchIdeas(String keyword, String techStack, String difficulty, String sortBy, String direction,
+            int page, int size);
+}
