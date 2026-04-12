@@ -11,11 +11,16 @@ import org.springframework.stereotype.Repository;
 
 import com.example.idea.dto.IdeaWithCountsProjection;
 import com.example.idea.entity.Idea;
+import com.example.user.entity.User;
 
 @Repository
 public interface IdeaRepository extends JpaRepository<Idea, Long> {
 
     List<Idea> findByCreatedById(Long userId);
+
+    List<Idea> findByCreatedByOrderByCreatedAtDesc(User user);
+
+    Long countByCreatedBy(User user);
 
     /**
      * Simple search — no joins.

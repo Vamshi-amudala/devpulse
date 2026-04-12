@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import com.example.implementation.entity.Implementation;
 import com.example.implementation.exception.ImplementationNotFoundException;
 import com.example.implementation.repository.ImplementationRepository;
+import com.example.notification.entity.NotificationType;
+import com.example.notification.service.NotificationService;
 import com.example.user.entity.User;
 import com.example.user.repository.UserRepository;
 import com.example.vote.entity.Vote;
@@ -29,6 +31,9 @@ public class VoteServiceImpl implements VoteService {
 
     @Autowired
     private ImplementationRepository impRepo;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     @Caching(evict = {
@@ -64,6 +69,16 @@ public class VoteServiceImpl implements VoteService {
                     .user(user)
                     .build();
             voteRepo.save(vote);
+
+            // Create notification for the implementation submitter
+            String message = user.getName() + " upvoted your implementation for idea: " + implementation.getIdea().getTitle();
+            notificationService.createNotification(
+                    implementation.getSubmittedBy().getId(),
+                    NotificationType.UPVOTE_RECEIVED,
+                    message,
+                    "IMPLEMENTATION",
+                    implementation.getId());
+
             return "Voted";
         }
     }

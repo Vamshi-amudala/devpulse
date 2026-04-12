@@ -4,6 +4,7 @@ import com.example.user.dto.ForgotPasswordRequest;
 import com.example.user.dto.LoginRequestDto;
 import com.example.user.dto.RegisterRequest;
 import com.example.user.dto.ResetPasswordRequest;
+import com.example.user.entity.User;
 
 public interface UserService {
 
@@ -14,5 +15,7 @@ public interface UserService {
 	void forgotPassword(ForgotPasswordRequest request);
 
 	void resetPassword(ResetPasswordRequest request);
+
+	User findByEmail(String email);
 
 }

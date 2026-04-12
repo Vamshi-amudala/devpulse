@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
-        return jwtUtil.generateToken(user.getEmail());
+        return jwtUtil.generateToken(user.getEmail(), user.getRole().name());
     }
 
     @Override
@@ -119,5 +119,11 @@ public class UserServiceImpl implements UserService {
         otpRepo.delete(resetOtp);
 
         log.info("Password reset successful for user: {}", user.getEmail());
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepo.findByEmail(email)
+                .orElseThrow(() -> new EmailNotFoundException("User not found with email: " + email));
     }
 }
