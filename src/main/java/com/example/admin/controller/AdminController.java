@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.admin.dto.AdminDashboardResponse;
+import com.example.admin.service.AdminDashboardService;
 import com.example.admin.service.AdminService;
 import com.example.idea.dto.IdeaResponse;
 import com.example.user.dto.UserResponse;
@@ -20,6 +22,17 @@ public class AdminController {
 
     @Autowired
     private AdminService adminService;
+
+    @Autowired
+    private AdminDashboardService adminDashboardService;
+
+    // ─── Dashboard ────────────────────────────────────────────────────────────
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<AdminDashboardResponse> getAdminDashboard() {
+        AdminDashboardResponse dashboard = adminDashboardService.getAdminDashboard();
+        return ResponseEntity.ok(dashboard);
+    }
 
     // ─── Users ───────────────────────────────────────────────────────────────
 

@@ -8,6 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.config.RateLimiterService;
+import com.example.dashboard.dto.DashboardResponse;
+import com.example.dashboard.service.DashboardService;
 import com.example.user.dto.ForgotPasswordRequest;
 import com.example.user.dto.LoginRequestDto;
 import com.example.user.dto.RegisterRequest;
@@ -23,10 +25,12 @@ public class UserController {
 
     private final UserService userService;
     private final RateLimiterService rateLimiter;
+    private final DashboardService dashboardService;
 
-    public UserController(UserService userService, RateLimiterService rateLimiter) {
+    public UserController(UserService userService, RateLimiterService rateLimiter, DashboardService dashboardService) {
         this.userService = userService;
         this.rateLimiter = rateLimiter;
+        this.dashboardService = dashboardService;
     }
 
     @PostMapping("/register")
@@ -51,6 +55,14 @@ public class UserController {
         String email = authentication.getName();
         String role = authentication.getAuthorities().iterator().next().getAuthority();
         return ResponseEntity.ok(Map.of("email", email, "role", role));
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<DashboardResponse> getDashboard(Authentication authentication) {
+        String email = authentication.getName();
+        com.example.user.entity.User user = userService.findByEmail(email);
+        DashboardResponse dashboard = dashboardService.getUserDashboard(user.getId());
+        return ResponseEntity.ok(dashboard);
     }
 
     @PostMapping("/forgot-password")
