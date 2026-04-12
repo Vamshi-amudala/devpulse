@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.example.idea.dto.IdeaResponse;
 import com.example.idea.repository.IdeaRepository;
 import com.example.implementation.repository.ImplementationRepository;
+import com.example.notification.repository.NotificationRepository;
 import com.example.user.dto.UserResponse;
 import com.example.user.repository.UserRepository;
 import com.example.vote.repository.VoteRepository;
@@ -29,6 +30,9 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private VoteRepository voteRepo;
 
+    @Autowired
+    private NotificationRepository notificationRepo;
+
     // ─── Users ───────────────────────────────────────────────────────────────
 
     @Override
@@ -48,6 +52,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public void deleteUser(Long userId) {
         voteRepo.deleteByUserId(userId);
+        notificationRepo.deleteByUserId(userId);
         ideaRepo.deleteAll(ideaRepo.findByCreatedById(userId));
         impRepo.deleteAll(impRepo.findBySubmittedById(userId));
         userRepo.deleteById(userId);

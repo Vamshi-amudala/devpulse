@@ -19,6 +19,8 @@ import com.example.implementation.dto.ImplementationResponse;
 import com.example.implementation.entity.Implementation;
 import com.example.implementation.exception.ImplementationNotFoundException;
 import com.example.implementation.repository.ImplementationRepository;
+import com.example.notification.entity.NotificationType;
+import com.example.notification.service.NotificationService;
 import com.example.user.entity.User;
 import com.example.user.repository.UserRepository;
 
@@ -40,6 +42,9 @@ public class ImplementationServiceImpl implements ImplementationService {
 
         @Autowired
         private EmailService emailService;
+
+        @Autowired
+        private NotificationService notificationService;
 
         @Override
         public ImplementationResponse createImplementation(Long ideaId, ImplementationRequest request) {
@@ -67,10 +72,19 @@ public class ImplementationServiceImpl implements ImplementationService {
                 // submitting the implementation.
                 if (!idea.getCreatedBy().getEmail().equals(user.getEmail())) {
                         emailService.sendImplementationNotificationEmail(
-                                        idea.getCreatedBy().getName(),
+                                        idea.getCreatedBy().getEmail(),
                                         idea.getTitle(),
                                         user.getName(),
                                         saved.getRepoName());
+
+                        // Create in-app notification
+                        String message = user.getName() + " submitted an implementation for your idea: " + idea.getTitle();
+                        notificationService.createNotification(
+                                idea.getCreatedBy().getId(),
+                                NotificationType.NEW_IMPLEMENTATION,
+                                message,
+                                "IDEA",
+                                idea.getId());
                 }
 
                 return ImplementationResponse.builder()
