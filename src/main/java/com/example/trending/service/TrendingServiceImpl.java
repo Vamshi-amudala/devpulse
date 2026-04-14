@@ -36,6 +36,7 @@ public class TrendingServiceImpl implements TrendingService {
 
             result.add(TrendingResponse.builder()
                     .implementationId(impl.getId())
+                    .ideaId(impl.getIdea().getId())
                     .githubUrl(impl.getGithubUrl())
                     .repoName(impl.getRepoName())
                     .stars(impl.getStars())
