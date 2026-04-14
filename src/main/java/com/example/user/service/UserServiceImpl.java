@@ -3,8 +3,10 @@ package com.example.user.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.config.JwtUtil;
 import com.example.email.service.EmailService;
@@ -109,6 +111,10 @@ public class UserServiceImpl implements UserService {
         if (resetOtp.isExpired()) {
             otpRepo.delete(resetOtp);
             throw new InvalidOtpException("OTP code has expired");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords do not match");
         }
 
         User user = resetOtp.getUser();
